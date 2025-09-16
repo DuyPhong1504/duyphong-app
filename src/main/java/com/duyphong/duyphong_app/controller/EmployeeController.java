@@ -1,5 +1,6 @@
 package com.duyphong.duyphong_app.controller;
 
+import com.duyphong.duyphong_app.dto.EmployeeDetailDto;
 import com.duyphong.duyphong_app.dto.EmployeeDto;
 import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
 import com.duyphong.duyphong_app.service.EmployeeService;
@@ -40,6 +41,26 @@ public class EmployeeController {
         if (employee.isPresent()) {
             log.info("Successfully retrieved employee with ID: {}", id);
             return ResponseEntity.ok(employee.get());
+        } else {
+            log.warn("Employee not found with ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Get detailed employee information including department and ongoing tasks
+     * @param id the employee ID as path variable
+     * @return ResponseEntity containing EmployeeDetailDto if found, 404 if not found
+     */
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<EmployeeDetailDto> getEmployeeDetailById(@PathVariable @NotEmpty(message = "Employee ID cannot be empty") String id) {
+        log.info("Received request to get employee detail with ID: {}", id);
+        
+        Optional<EmployeeDetailDto> employeeDetail = employeeService.findEmployeeDetailById(id.trim());
+        
+        if (employeeDetail.isPresent()) {
+            log.info("Successfully retrieved employee detail with ID: {}", id);
+            return ResponseEntity.ok(employeeDetail.get());
         } else {
             log.warn("Employee not found with ID: {}", id);
             return ResponseEntity.notFound().build();

@@ -2,10 +2,12 @@ package com.duyphong.duyphong_app.mapper;
 
 import com.duyphong.duyphong_app.dto.EmployeeDto;
 import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
+import com.duyphong.duyphong_app.entity.DepartmentEntity;
 import com.duyphong.duyphong_app.entity.EmployeeEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
 import java.util.List;
 
@@ -17,6 +19,7 @@ public interface EmployeeMapper {
      * @param entity the employee entity to convert
      * @return the converted employee DTO
      */
+    @Mapping(target = "department", source = "department", qualifiedByName = "departmentToString")
     EmployeeDto toDto(EmployeeEntity entity);
 
     /**
@@ -24,6 +27,7 @@ public interface EmployeeMapper {
      * @param dto the employee DTO to convert
      * @return the converted employee entity
      */
+    @Mapping(target = "department", source = "department", qualifiedByName = "stringToDepartment")
     EmployeeEntity toEntity(EmployeeDto dto);
 
     /**
@@ -49,6 +53,7 @@ public interface EmployeeMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "department", source = "department", qualifiedByName = "stringToDepartment")
     void updateEntityFromDto(EmployeeDto dto, @MappingTarget EmployeeEntity entity);
 
     /**
@@ -65,4 +70,30 @@ public interface EmployeeMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntityFromUpdateDto(EmployeeUpdateDto updateDto, @MappingTarget EmployeeEntity entity);
+
+    /**
+     * Convert DepartmentEntity to String (department name)
+     * @param department the department entity
+     * @return the department name or null if department is null
+     */
+    @Named("departmentToString")
+    default String mapDepartmentToString(DepartmentEntity department) {
+        return department != null ? department.getName() : null;
+    }
+
+    /**
+     * Convert String to DepartmentEntity (for reverse mapping)
+     * Note: This creates a department entity with only the name field set
+     * @param departmentName the department name
+     * @return a department entity with the name set or null if name is null
+     */
+    @Named("stringToDepartment")
+    default DepartmentEntity mapStringToDepartment(String departmentName) {
+        if (departmentName == null) {
+            return null;
+        }
+        DepartmentEntity department = new DepartmentEntity();
+        department.setName(departmentName);
+        return department;
+    }
 }

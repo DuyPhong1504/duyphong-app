@@ -1,16 +1,22 @@
 package com.duyphong.duyphong_app.service;
 
+import com.duyphong.duyphong_app.dto.EmployeeDetailDto;
 import com.duyphong.duyphong_app.dto.EmployeeDto;
 import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
 import com.duyphong.duyphong_app.entity.EmployeeEntity;
+import com.duyphong.duyphong_app.entity.TaskEntity;
+import com.duyphong.duyphong_app.enumeration.TaskStatus;
 import com.duyphong.duyphong_app.mapper.EmployeeMapper;
 import com.duyphong.duyphong_app.repository.EmployeeRepository;
+import com.duyphong.duyphong_app.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service layer for Employee operations
@@ -23,6 +29,7 @@ import java.util.Optional;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final TaskRepository taskRepository;
     private final EmployeeMapper employeeMapper;
 
     /**
@@ -39,6 +46,62 @@ public class EmployeeService {
             log.info("Employee found with ID: {}", id);
             EmployeeDto employeeDto = employeeMapper.toDto(employeeEntity.get());
             return Optional.of(employeeDto);
+        } else {
+            log.warn("Employee not found with ID: {}", id);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Find employee detail by ID including department and ongoing tasks
+     * @param id the employee ID
+     * @return Optional containing EmployeeDetailDto if found, empty otherwise
+     */
+    public Optional<EmployeeDetailDto> findEmployeeDetailById(String id) {
+        log.info("Finding employee detail with ID: {}", id);
+        
+        Optional<EmployeeEntity> employeeEntityOpt = employeeRepository.findByIdWithDepartment(id);
+        
+        if (employeeEntityOpt.isPresent()) {
+            EmployeeEntity employee = employeeEntityOpt.get();
+            log.info("Employee found with ID: {}", id);
+            
+            // Get ongoing tasks (IN_PROGRESS status)
+            List<TaskEntity> ongoingTasks = taskRepository.findByEmployeeIdAndStatus(id, TaskStatus.IN_PROGRESS);
+            log.debug("Found {} ongoing tasks for employee: {}", ongoingTasks.size(), id);
+            
+            // Build department info
+            EmployeeDetailDto.DepartmentInfo departmentInfo = null;
+            if (employee.getDepartment() != null) {
+                departmentInfo = EmployeeDetailDto.DepartmentInfo.builder()
+                        .id(employee.getDepartment().getId())
+                        .name(employee.getDepartment().getName())
+                        .build();
+            }
+            
+            // Build task info list
+            List<EmployeeDetailDto.TaskInfo> taskInfoList = ongoingTasks.stream()
+                    .map(task -> EmployeeDetailDto.TaskInfo.builder()
+                            .id(task.getId())
+                            .taskName(task.getTaskName())
+                            .description(task.getDescription())
+                            .dueDate(task.getDueDate())
+                            .status(task.getStatus().name())
+                            .build())
+                    .collect(Collectors.toList());
+            
+            // Build employee detail DTO
+            EmployeeDetailDto employeeDetailDto = EmployeeDetailDto.builder()
+                    .id(employee.getId())
+                    .fullname(employee.getFullname())
+                    .email(employee.getEmail())
+                    .position(employee.getPosition())
+                    .salary(employee.getSalary())
+                    .department(departmentInfo)
+                    .ongoingTasks(taskInfoList)
+                    .build();
+            
+            return Optional.of(employeeDetailDto);
         } else {
             log.warn("Employee not found with ID: {}", id);
             return Optional.empty();

@@ -25,8 +25,9 @@ public class EmployeeEntity {
     @Column(name = "fullname", length = 255, nullable = false)
     private String fullname;
 
-    @Column(name = "department", length = 255)
-    private String department;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department", referencedColumnName = "id")
+    private DepartmentEntity department;
 
     @Column(name = "position", length = 255)
     private String position;
