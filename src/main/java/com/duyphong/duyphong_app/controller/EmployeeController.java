@@ -3,6 +3,8 @@ package com.duyphong.duyphong_app.controller;
 import com.duyphong.duyphong_app.dto.EmployeeDetailDto;
 import com.duyphong.duyphong_app.dto.EmployeeDto;
 import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
+import com.duyphong.duyphong_app.dto.UpdateEmployeeDepartmentRequest;
+import com.duyphong.duyphong_app.dto.UpdateEmployeeDepartmentResponse;
 import com.duyphong.duyphong_app.service.EmployeeService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -88,6 +91,40 @@ public class EmployeeController {
         } else {
             log.warn("Employee not found with ID: {}", id);
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Update employee's department
+     * @param employeeId the employee ID as path variable
+     * @param request the request body containing new department ID (validated automatically)
+     * @return ResponseEntity containing UpdateEmployeeDepartmentResponse if successful, 404 if not found, 400 if validation fails or same department
+     */
+    @PutMapping("/department/{employeeId}")
+    public ResponseEntity<?> updateEmployeeDepartment(
+            @PathVariable @NotEmpty(message = "Employee ID cannot be empty") String employeeId, 
+            @Valid @RequestBody UpdateEmployeeDepartmentRequest request) {
+        
+        log.info("Received request to update department for employee ID: {} to department ID: {}", employeeId, request.getNewDepartmentId());
+        
+        try {
+            Optional<UpdateEmployeeDepartmentResponse> result = employeeService.updateEmployeeDepartment(employeeId.trim(), request);
+            
+            if (result.isPresent()) {
+                log.info("Successfully updated department for employee with ID: {}", employeeId);
+                return ResponseEntity.ok(result.get());
+            } else {
+                log.warn("Employee or department not found - Employee ID: {}, Department ID: {}", employeeId, request.getNewDepartmentId());
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid request: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                "timestamp", java.time.LocalDateTime.now(),
+                "status", 400,
+                "error", "Bad Request",
+                "message", e.getMessage()
+            ));
         }
     }
 }

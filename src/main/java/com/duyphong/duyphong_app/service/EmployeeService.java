@@ -3,10 +3,16 @@ package com.duyphong.duyphong_app.service;
 import com.duyphong.duyphong_app.dto.EmployeeDetailDto;
 import com.duyphong.duyphong_app.dto.EmployeeDto;
 import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
+import com.duyphong.duyphong_app.dto.UpdateEmployeeDepartmentRequest;
+import com.duyphong.duyphong_app.dto.UpdateEmployeeDepartmentResponse;
+import com.duyphong.duyphong_app.entity.DepartmentEntity;
+import com.duyphong.duyphong_app.entity.DepartmentHistoryEntity;
 import com.duyphong.duyphong_app.entity.EmployeeEntity;
 import com.duyphong.duyphong_app.entity.TaskEntity;
 import com.duyphong.duyphong_app.enumeration.TaskStatus;
 import com.duyphong.duyphong_app.mapper.EmployeeMapper;
+import com.duyphong.duyphong_app.repository.DepartmentHistoryRepository;
+import com.duyphong.duyphong_app.repository.DepartmentRepository;
 import com.duyphong.duyphong_app.repository.EmployeeRepository;
 import com.duyphong.duyphong_app.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +36,8 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final TaskRepository taskRepository;
+    private final DepartmentRepository departmentRepository;
+    private final DepartmentHistoryRepository departmentHistoryRepository;
     private final EmployeeMapper employeeMapper;
 
     /**
@@ -153,6 +161,81 @@ public class EmployeeService {
             log.warn("Employee not found with ID: {}", id);
             return Optional.empty();
         }
+    }
+
+    /**
+     * Update employee's department and create history record
+     * This operation is transactional - either both operations succeed or both fail
+     * @param employeeId the employee ID
+     * @param request the request containing new department ID
+     * @return Optional containing UpdateEmployeeDepartmentResponse if successful, empty if employee or department not found
+     * @throws IllegalArgumentException if the new department is the same as current department
+     */
+    @Transactional
+    public Optional<UpdateEmployeeDepartmentResponse> updateEmployeeDepartment(String employeeId, UpdateEmployeeDepartmentRequest request) {
+        log.info("Updating department for employee ID: {} to department ID: {}", employeeId, request.getNewDepartmentId());
+        
+        // Find employee with current department
+        Optional<EmployeeEntity> employeeEntityOpt = employeeRepository.findByIdWithDepartment(employeeId);
+        if (employeeEntityOpt.isEmpty()) {
+            log.warn("Employee not found with ID: {}", employeeId);
+            return Optional.empty();
+        }
+        
+        EmployeeEntity employee = employeeEntityOpt.get();
+        
+        // Find the new department
+        Optional<DepartmentEntity> newDepartmentOpt = departmentRepository.findById(request.getNewDepartmentId());
+        if (newDepartmentOpt.isEmpty()) {
+            log.warn("Department not found with ID: {}", request.getNewDepartmentId());
+            return Optional.empty();
+        }
+        
+        DepartmentEntity newDepartment = newDepartmentOpt.get();
+        DepartmentEntity oldDepartment = employee.getDepartment();
+        
+        // Check if it's actually a change
+        if (oldDepartment != null && oldDepartment.getId().equals(request.getNewDepartmentId())) {
+            log.warn("Employee {} is already in department {}", employeeId, request.getNewDepartmentId());
+            throw new IllegalArgumentException("Employee is already in the specified department");
+        }
+        
+        // Create department history record
+        DepartmentHistoryEntity historyEntity = DepartmentHistoryEntity.builder()
+                .employeeId(employeeId)
+                .oldDepartmentId(oldDepartment != null ? oldDepartment.getId() : null)
+                .newDepartmentId(request.getNewDepartmentId())
+                .changeDate(java.time.Instant.now())
+                .build();
+        
+        // Save history record first
+        DepartmentHistoryEntity savedHistory = departmentHistoryRepository.save(historyEntity);
+        log.info("Created department history record with ID: {}", savedHistory.getId());
+        
+        // Update employee's department
+        employee.setDepartment(newDepartment);
+        EmployeeEntity savedEmployee = employeeRepository.save(employee);
+        log.info("Updated employee {} department from {} to {}", 
+                employeeId, 
+                oldDepartment != null ? oldDepartment.getId() : "null", 
+                newDepartment.getId());
+        
+        // Create response
+        UpdateEmployeeDepartmentResponse response = UpdateEmployeeDepartmentResponse.builder()
+                .employeeId(savedEmployee.getId())
+                .employeeFullname(savedEmployee.getFullname())
+                .employeeEmail(savedEmployee.getEmail())
+                .employeePosition(savedEmployee.getPosition())
+                .employeeSalary(savedEmployee.getSalary())
+                .oldDepartmentId(oldDepartment != null ? oldDepartment.getId() : null)
+                .oldDepartmentName(oldDepartment != null ? oldDepartment.getName() : null)
+                .newDepartmentId(newDepartment.getId())
+                .newDepartmentName(newDepartment.getName())
+                .changeDate(savedHistory.getChangeDate())
+                .message("Employee department updated successfully")
+                .build();
+        
+        return Optional.of(response);
     }
 
 }
