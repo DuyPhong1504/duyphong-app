@@ -9,7 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +37,34 @@ public class GlobalExceptionHandler {
         
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
             fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Validation Failed")
+                .message("Request validation failed")
+                .fieldErrors(fieldErrors)
+                .build();
+        
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    /**
+     * Handle constraint validation errors from @NotEmpty, @NotNull etc. on path variables
+     * @param ex the ConstraintViolationException
+     * @return ResponseEntity with error details
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        log.warn("Constraint violation error occurred: {}", ex.getMessage());
+        
+        Map<String, String> fieldErrors = new HashMap<>();
+        
+        for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+            String fieldName = violation.getPropertyPath().toString();
+            String errorMessage = violation.getMessage();
+            fieldErrors.put(fieldName, errorMessage);
         }
         
         ErrorResponse errorResponse = ErrorResponse.builder()

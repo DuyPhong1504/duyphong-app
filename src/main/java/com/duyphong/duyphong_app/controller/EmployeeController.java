@@ -4,9 +4,11 @@ import com.duyphong.duyphong_app.dto.EmployeeDto;
 import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
 import com.duyphong.duyphong_app.service.EmployeeService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -19,6 +21,7 @@ import java.util.Optional;
 @RequestMapping("/api/employees")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -29,14 +32,8 @@ public class EmployeeController {
      * @return ResponseEntity containing EmployeeDto if found, 404 if not found
      */
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable String id) {
+    public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable @NotEmpty(message = "Employee ID cannot be empty") String id) {
         log.info("Received request to get employee with ID: {}", id);
-        
-        // Validate input
-        if (id == null || id.trim().isEmpty()) {
-            log.warn("Invalid employee ID provided: {}", id);
-            return ResponseEntity.badRequest().build();
-        }
         
         Optional<EmployeeDto> employee = employeeService.findEmployeeById(id.trim());
         
@@ -56,14 +53,8 @@ public class EmployeeController {
      * @return ResponseEntity containing updated EmployeeDto if successful, 404 if not found, 400 if validation fails
      */
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable String id, @Valid @RequestBody EmployeeUpdateDto updateDto) {
+    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable @NotEmpty(message = "Employee ID cannot be empty") String id, @Valid @RequestBody EmployeeUpdateDto updateDto) {
         log.info("Received request to update employee with ID: {}", id);
-        
-        // Validate path variable
-        if (id == null || id.trim().isEmpty()) {
-            log.warn("Invalid employee ID provided: {}", id);
-            return ResponseEntity.badRequest().build();
-        }
         
         log.debug("Update request data - Name: {}, Position: {}, Salary: {}", 
                  updateDto.getFullname(), updateDto.getPosition(), updateDto.getSalary());
