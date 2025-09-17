@@ -1,4 +1,4 @@
-package com.duyphong.duyphong_app.dto;
+package com.duyphong.duyphong_app.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

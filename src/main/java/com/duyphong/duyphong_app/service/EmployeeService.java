@@ -1,10 +1,10 @@
 package com.duyphong.duyphong_app.service;
 
-import com.duyphong.duyphong_app.dto.EmployeeDetailDto;
-import com.duyphong.duyphong_app.dto.EmployeeDto;
-import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
-import com.duyphong.duyphong_app.dto.UpdateEmployeeDepartmentRequest;
-import com.duyphong.duyphong_app.dto.UpdateEmployeeDepartmentResponse;
+import com.duyphong.duyphong_app.dto.request.UpdateEmployeeDepartmentRequest;
+import com.duyphong.duyphong_app.dto.request.UpdateEmployeeRequest;
+import com.duyphong.duyphong_app.dto.response.EmployeeDetailResponse;
+import com.duyphong.duyphong_app.dto.response.EmployeeResponse;
+import com.duyphong.duyphong_app.dto.response.UpdateEmployeeDepartmentResponse;
 import com.duyphong.duyphong_app.entity.DepartmentEntity;
 import com.duyphong.duyphong_app.entity.DepartmentHistoryEntity;
 import com.duyphong.duyphong_app.entity.EmployeeEntity;
@@ -43,17 +43,17 @@ public class EmployeeService {
     /**
      * Find employee by ID and return as DTO
      * @param id the employee ID
-     * @return Optional containing EmployeeDto if found, empty otherwise
+     * @return Optional containing EmployeeResponse if found, empty otherwise
      */
-    public Optional<EmployeeDto> findEmployeeById(String id) {
+    public Optional<EmployeeResponse> findEmployeeById(String id) {
         log.info("Finding employee with ID: {}", id);
         
         Optional<EmployeeEntity> employeeEntity = employeeRepository.findById(id);
         
         if (employeeEntity.isPresent()) {
             log.info("Employee found with ID: {}", id);
-            EmployeeDto employeeDto = employeeMapper.toDto(employeeEntity.get());
-            return Optional.of(employeeDto);
+            EmployeeResponse employeeResponse = employeeMapper.toDto(employeeEntity.get());
+            return Optional.of(employeeResponse);
         } else {
             log.warn("Employee not found with ID: {}", id);
             return Optional.empty();
@@ -63,9 +63,9 @@ public class EmployeeService {
     /**
      * Find employee detail by ID including department and ongoing tasks
      * @param id the employee ID
-     * @return Optional containing EmployeeDetailDto if found, empty otherwise
+     * @return Optional containing EmployeeDetailResponse if found, empty otherwise
      */
-    public Optional<EmployeeDetailDto> findEmployeeDetailById(String id) {
+    public Optional<EmployeeDetailResponse> findEmployeeDetailById(String id) {
         log.info("Finding employee detail with ID: {}", id);
         
         Optional<EmployeeEntity> employeeEntityOpt = employeeRepository.findByIdWithDepartment(id);
@@ -79,17 +79,17 @@ public class EmployeeService {
             log.debug("Found {} ongoing tasks for employee: {}", ongoingTasks.size(), id);
             
             // Build department info
-            EmployeeDetailDto.DepartmentInfo departmentInfo = null;
+            EmployeeDetailResponse.DepartmentInfo departmentInfo = null;
             if (employee.getDepartment() != null) {
-                departmentInfo = EmployeeDetailDto.DepartmentInfo.builder()
+                departmentInfo = EmployeeDetailResponse.DepartmentInfo.builder()
                         .id(employee.getDepartment().getId())
                         .name(employee.getDepartment().getName())
                         .build();
             }
             
             // Build task info list
-            List<EmployeeDetailDto.TaskInfo> taskInfoList = ongoingTasks.stream()
-                    .map(task -> EmployeeDetailDto.TaskInfo.builder()
+            List<EmployeeDetailResponse.TaskInfo> taskInfoList = ongoingTasks.stream()
+                    .map(task -> EmployeeDetailResponse.TaskInfo.builder()
                             .id(task.getId())
                             .taskName(task.getTaskName())
                             .description(task.getDescription())
@@ -99,7 +99,7 @@ public class EmployeeService {
                     .collect(Collectors.toList());
             
             // Build employee detail DTO
-            EmployeeDetailDto employeeDetailDto = EmployeeDetailDto.builder()
+            EmployeeDetailResponse employeeDetailResponse = EmployeeDetailResponse.builder()
                     .id(employee.getId())
                     .fullname(employee.getFullname())
                     .email(employee.getEmail())
@@ -109,7 +109,7 @@ public class EmployeeService {
                     .ongoingTasks(taskInfoList)
                     .build();
             
-            return Optional.of(employeeDetailDto);
+            return Optional.of(employeeDetailResponse);
         } else {
             log.warn("Employee not found with ID: {}", id);
             return Optional.empty();
@@ -118,13 +118,13 @@ public class EmployeeService {
 
     /**
      * Update employee information (fullname, position, salary)
-     * Only updates fields that are not null in the updateDto
+     * Only updates fields that are not null in the updateRequest
      * @param id the employee ID
-     * @param updateDto the DTO containing updated information
-     * @return Optional containing updated EmployeeDto if successful, empty if employee not found
+     * @param updateRequest the request containing updated information
+     * @return Optional containing updated EmployeeResponse if successful, empty if employee not found
      */
     @Transactional
-    public Optional<EmployeeDto> updateEmployee(String id, EmployeeUpdateDto updateDto) {
+    public Optional<EmployeeResponse> updateEmployee(String id, UpdateEmployeeRequest updateRequest) {
         log.info("Updating employee with ID: {}", id);
         
         Optional<EmployeeEntity> employeeEntityOpt = employeeRepository.findById(id);
@@ -137,14 +137,14 @@ public class EmployeeService {
                      employeeEntity.getFullname(), employeeEntity.getPosition(), employeeEntity.getSalary());
             
             // Update only non-null fields
-            if (updateDto.getFullname() != null) {
-                employeeEntity.setFullname(updateDto.getFullname());
+            if (updateRequest.getFullname() != null) {
+                employeeEntity.setFullname(updateRequest.getFullname());
             }
-            if (updateDto.getPosition() != null) {
-                employeeEntity.setPosition(updateDto.getPosition());
+            if (updateRequest.getPosition() != null) {
+                employeeEntity.setPosition(updateRequest.getPosition());
             }
-            if (updateDto.getSalary() != null) {
-                employeeEntity.setSalary(updateDto.getSalary());
+            if (updateRequest.getSalary() != null) {
+                employeeEntity.setSalary(updateRequest.getSalary());
             }
             
             // Save the updated entity
@@ -155,8 +155,8 @@ public class EmployeeService {
                     savedEntity.getId(), savedEntity.getFullname(), savedEntity.getPosition(), savedEntity.getSalary());
             
             // Convert to DTO and return
-            EmployeeDto employeeDto = employeeMapper.toDto(savedEntity);
-            return Optional.of(employeeDto);
+            EmployeeResponse employeeResponse = employeeMapper.toDto(savedEntity);
+            return Optional.of(employeeResponse);
         } else {
             log.warn("Employee not found with ID: {}", id);
             return Optional.empty();

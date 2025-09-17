@@ -1,4 +1,4 @@
-package com.duyphong.duyphong_app.dto;
+package com.duyphong.duyphong_app.dto.response;
 
 import lombok.*;
 

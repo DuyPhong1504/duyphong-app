@@ -1,10 +1,10 @@
 package com.duyphong.duyphong_app.controller;
 
-import com.duyphong.duyphong_app.dto.EmployeeDetailDto;
-import com.duyphong.duyphong_app.dto.EmployeeDto;
-import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
-import com.duyphong.duyphong_app.dto.UpdateEmployeeDepartmentRequest;
-import com.duyphong.duyphong_app.dto.UpdateEmployeeDepartmentResponse;
+import com.duyphong.duyphong_app.dto.request.UpdateEmployeeRequest;
+import com.duyphong.duyphong_app.dto.request.UpdateEmployeeDepartmentRequest;
+import com.duyphong.duyphong_app.dto.response.EmployeeDetailResponse;
+import com.duyphong.duyphong_app.dto.response.EmployeeResponse;
+import com.duyphong.duyphong_app.dto.response.UpdateEmployeeDepartmentResponse;
 import com.duyphong.duyphong_app.service.EmployeeService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -33,13 +33,13 @@ public class EmployeeController {
     /**
      * Get employee by ID
      * @param id the employee ID as path variable
-     * @return ResponseEntity containing EmployeeDto if found, 404 if not found
+     * @return ResponseEntity containing EmployeeResponse if found, 404 if not found
      */
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable @NotEmpty(message = "Employee ID cannot be empty") String id) {
+    public ResponseEntity<EmployeeResponse> getEmployeeById(@PathVariable @NotEmpty(message = "Employee ID cannot be empty") String id) {
         log.info("Received request to get employee with ID: {}", id);
         
-        Optional<EmployeeDto> employee = employeeService.findEmployeeById(id.trim());
+        Optional<EmployeeResponse> employee = employeeService.findEmployeeById(id.trim());
         
         if (employee.isPresent()) {
             log.info("Successfully retrieved employee with ID: {}", id);
@@ -53,13 +53,13 @@ public class EmployeeController {
     /**
      * Get detailed employee information including department and ongoing tasks
      * @param id the employee ID as path variable
-     * @return ResponseEntity containing EmployeeDetailDto if found, 404 if not found
+     * @return ResponseEntity containing EmployeeDetailResponse if found, 404 if not found
      */
     @GetMapping("/detail/{id}")
-    public ResponseEntity<EmployeeDetailDto> getEmployeeDetailById(@PathVariable @NotEmpty(message = "Employee ID cannot be empty") String id) {
+    public ResponseEntity<EmployeeDetailResponse> getEmployeeDetailById(@PathVariable @NotEmpty(message = "Employee ID cannot be empty") String id) {
         log.info("Received request to get employee detail with ID: {}", id);
         
-        Optional<EmployeeDetailDto> employeeDetail = employeeService.findEmployeeDetailById(id.trim());
+        Optional<EmployeeDetailResponse> employeeDetail = employeeService.findEmployeeDetailById(id.trim());
         
         if (employeeDetail.isPresent()) {
             log.info("Successfully retrieved employee detail with ID: {}", id);
@@ -73,17 +73,17 @@ public class EmployeeController {
     /**
      * Update employee information (fullname, position, salary)
      * @param id the employee ID as path variable
-     * @param updateDto the request body containing employee update data (validated automatically)
-     * @return ResponseEntity containing updated EmployeeDto if successful, 404 if not found, 400 if validation fails
+     * @param updateRequest the request body containing employee update data (validated automatically)
+     * @return ResponseEntity containing updated EmployeeResponse if successful, 404 if not found, 400 if validation fails
      */
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable @NotEmpty(message = "Employee ID cannot be empty") String id, @Valid @RequestBody EmployeeUpdateDto updateDto) {
+    public ResponseEntity<EmployeeResponse> updateEmployee(@PathVariable @NotEmpty(message = "Employee ID cannot be empty") String id, @Valid @RequestBody UpdateEmployeeRequest updateRequest) {
         log.info("Received request to update employee with ID: {}", id);
         
         log.debug("Update request data - Name: {}, Position: {}, Salary: {}", 
-                 updateDto.getFullname(), updateDto.getPosition(), updateDto.getSalary());
+                 updateRequest.getFullname(), updateRequest.getPosition(), updateRequest.getSalary());
         
-        Optional<EmployeeDto> updatedEmployee = employeeService.updateEmployee(id.trim(), updateDto);
+        Optional<EmployeeResponse> updatedEmployee = employeeService.updateEmployee(id.trim(), updateRequest);
         
         if (updatedEmployee.isPresent()) {
             log.info("Successfully updated employee with ID: {}", id);

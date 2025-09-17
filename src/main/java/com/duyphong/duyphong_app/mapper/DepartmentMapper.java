@@ -1,6 +1,6 @@
 package com.duyphong.duyphong_app.mapper;
 
-import com.duyphong.duyphong_app.dto.DepartmentDto;
+import com.duyphong.duyphong_app.dto.response.DepartmentResponse;
 import com.duyphong.duyphong_app.entity.DepartmentEntity;
 import org.mapstruct.Mapper;
 
@@ -10,30 +10,30 @@ import java.util.List;
 public interface DepartmentMapper {
 
     /**
-     * Convert DepartmentEntity to DepartmentDto
+     * Convert DepartmentEntity to DepartmentResponse
      * @param entity the department entity to convert
-     * @return the converted department DTO
+     * @return the converted department response DTO
      */
-    DepartmentDto toDto(DepartmentEntity entity);
+    DepartmentResponse toDto(DepartmentEntity entity);
 
     /**
-     * Convert DepartmentDto to DepartmentEntity
-     * @param dto the department DTO to convert
+     * Convert DepartmentResponse to DepartmentEntity
+     * @param dto the department response DTO to convert
      * @return the converted department entity
      */
-    DepartmentEntity toEntity(DepartmentDto dto);
+    DepartmentEntity toEntity(DepartmentResponse dto);
 
     /**
-     * Convert a list of DepartmentEntity to a list of DepartmentDto
+     * Convert a list of DepartmentEntity to a list of DepartmentResponse
      * @param entities the list of department entities to convert
-     * @return the converted list of department DTOs
+     * @return the converted list of department response DTOs
      */
-    List<DepartmentDto> toDtoList(List<DepartmentEntity> entities);
+    List<DepartmentResponse> toDtoList(List<DepartmentEntity> entities);
 
     /**
-     * Convert a list of DepartmentDto to a list of DepartmentEntity
-     * @param dtos the list of department DTOs to convert
+     * Convert a list of DepartmentResponse to a list of DepartmentEntity
+     * @param dtos the list of department response DTOs to convert
      * @return the converted list of department entities
      */
-    List<DepartmentEntity> toEntityList(List<DepartmentDto> dtos);
+    List<DepartmentEntity> toEntityList(List<DepartmentResponse> dtos);
 }

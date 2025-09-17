@@ -3,12 +3,15 @@ package com.duyphong.duyphong_app.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
@@ -92,6 +95,54 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Type Mismatch")
                 .message(String.format("Invalid value '%s' for parameter '%s'", ex.getValue(), ex.getName()))
+                .build();
+        
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    /**
+     * Handle JSON parsing errors (including date format errors)
+     * @param ex the HttpMessageNotReadableException
+     * @return ResponseEntity with error details
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleJsonParseError(HttpMessageNotReadableException ex) {
+        log.warn("JSON parsing error occurred: {}", ex.getMessage());
+        
+        String message = "Invalid JSON format";
+        
+        // Check if it's a date format error
+        Throwable cause = ex.getCause();
+        if (cause instanceof InvalidFormatException) {
+            InvalidFormatException invalidFormatEx = (InvalidFormatException) cause;
+            if (invalidFormatEx.getTargetType() != null && 
+                invalidFormatEx.getTargetType().getSimpleName().equals("LocalDate")) {
+                
+                String fieldName = "dueDate";
+                if (invalidFormatEx.getPath() != null && !invalidFormatEx.getPath().isEmpty()) {
+                    fieldName = invalidFormatEx.getPath().get(invalidFormatEx.getPath().size() - 1).getFieldName();
+                }
+                
+                Map<String, String> fieldErrors = new HashMap<>();
+                fieldErrors.put(fieldName, "Due date format is invalid. Please use format: yyyy-MM-dd (e.g., 2025-12-31)");
+                
+                ErrorResponse errorResponse = ErrorResponse.builder()
+                        .timestamp(LocalDateTime.now())
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .error("Date Format Error")
+                        .message("Invalid date format")
+                        .fieldErrors(fieldErrors)
+                        .build();
+                
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+        }
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("JSON Parse Error")
+                .message(message)
                 .build();
         
         return ResponseEntity.badRequest().body(errorResponse);

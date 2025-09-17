@@ -1,11 +1,11 @@
-package com.duyphong.duyphong_app.dto;
+package com.duyphong.duyphong_app.dto.response;
 
 import java.time.Instant;
 import lombok.*;
 
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-public class EmployeeDto {
+public class EmployeeResponse {
     private String id; 
 
     private String username;

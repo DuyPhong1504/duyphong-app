@@ -1,6 +1,6 @@
 package com.duyphong.duyphong_app.service;
 
-import com.duyphong.duyphong_app.dto.DepartmentDto;
+import com.duyphong.duyphong_app.dto.response.DepartmentResponse;
 import com.duyphong.duyphong_app.entity.DepartmentEntity;
 import com.duyphong.duyphong_app.mapper.DepartmentMapper;
 import com.duyphong.duyphong_app.repository.DepartmentRepository;
@@ -27,9 +27,9 @@ public class DepartmentService {
 
     /**
      * Get all departments
-     * @return List of DepartmentDto
+     * @return List of DepartmentResponse
      */
-    public List<DepartmentDto> getAllDepartments() {
+    public List<DepartmentResponse> getAllDepartments() {
         log.info("Retrieving all departments");
         
         List<DepartmentEntity> departments = departmentRepository.findAll();
@@ -41,11 +41,11 @@ public class DepartmentService {
     /**
      * Create a new department
      * @param name the department name
-     * @return the created DepartmentDto
+     * @return the created DepartmentResponse
      * @throws IllegalArgumentException if department name already exists
      */
     @Transactional
-    public DepartmentDto createDepartment(String name) {
+    public DepartmentResponse createDepartment(String name) {
         log.info("Creating new department with name: {}", name);
         
         if (name == null || name.trim().isEmpty()) {

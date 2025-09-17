@@ -1,7 +1,7 @@
 package com.duyphong.duyphong_app.mapper;
 
-import com.duyphong.duyphong_app.dto.EmployeeDto;
-import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
+import com.duyphong.duyphong_app.dto.request.UpdateEmployeeRequest;
+import com.duyphong.duyphong_app.dto.response.EmployeeResponse;
 import com.duyphong.duyphong_app.entity.DepartmentEntity;
 import com.duyphong.duyphong_app.entity.EmployeeEntity;
 import org.mapstruct.Mapper;
@@ -15,37 +15,37 @@ import java.util.List;
 public interface EmployeeMapper {
 
     /**
-     * Convert EmployeeEntity to EmployeeDto
+     * Convert EmployeeEntity to EmployeeResponse
      * @param entity the employee entity to convert
-     * @return the converted employee DTO
+     * @return the converted employee response DTO
      */
     @Mapping(target = "department", source = "department", qualifiedByName = "departmentToString")
-    EmployeeDto toDto(EmployeeEntity entity);
+    EmployeeResponse toDto(EmployeeEntity entity);
 
     /**
-     * Convert EmployeeDto to EmployeeEntity
-     * @param dto the employee DTO to convert
+     * Convert EmployeeResponse to EmployeeEntity
+     * @param dto the employee response DTO to convert
      * @return the converted employee entity
      */
     @Mapping(target = "department", source = "department", qualifiedByName = "stringToDepartment")
-    EmployeeEntity toEntity(EmployeeDto dto);
+    EmployeeEntity toEntity(EmployeeResponse dto);
 
     /**
-     * Convert a list of EmployeeEntity to a list of EmployeeDto
+     * Convert a list of EmployeeEntity to a list of EmployeeResponse
      * @param entities the list of employee entities to convert
-     * @return the list of converted employee DTOs
+     * @return the list of converted employee response DTOs
      */
-    List<EmployeeDto> toDtoList(List<EmployeeEntity> entities);
+    List<EmployeeResponse> toDtoList(List<EmployeeEntity> entities);
 
     /**
-     * Convert a list of EmployeeDto to a list of EmployeeEntity
-     * @param dtos the list of employee DTOs to convert
+     * Convert a list of EmployeeResponse to a list of EmployeeEntity
+     * @param dtos the list of employee response DTOs to convert
      * @return the list of converted employee entities
      */
-    List<EmployeeEntity> toEntityList(List<EmployeeDto> dtos);
+    List<EmployeeEntity> toEntityList(List<EmployeeResponse> dtos);
 
     /**
-     * Update an existing EmployeeEntity with data from EmployeeDto
+     * Update an existing EmployeeEntity with data from EmployeeResponse
      * Note: This method does not update id, createdAt, and updatedAt fields
      * @param dto the DTO containing the new data
      * @param entity the entity to update
@@ -54,13 +54,13 @@ public interface EmployeeMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "department", source = "department", qualifiedByName = "stringToDepartment")
-    void updateEntityFromDto(EmployeeDto dto, @MappingTarget EmployeeEntity entity);
+    void updateEntityFromDto(EmployeeResponse dto, @MappingTarget EmployeeEntity entity);
 
     /**
-     * Update an existing EmployeeEntity with data from EmployeeUpdateDto
+     * Update an existing EmployeeEntity with data from UpdateEmployeeRequest
      * Note: This method does not update id, createdAt, and updatedAt fields
      * Only updates fullname, position, and salary
-     * @param updateDto the UpdateDTO containing the new data
+     * @param updateRequest the UpdateRequest containing the new data
      * @param entity the entity to update
      */
     @Mapping(target = "id", ignore = true)
@@ -69,7 +69,7 @@ public interface EmployeeMapper {
     @Mapping(target = "department", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    void updateEntityFromUpdateDto(EmployeeUpdateDto updateDto, @MappingTarget EmployeeEntity entity);
+    void updateEntityFromUpdateRequest(UpdateEmployeeRequest updateRequest, @MappingTarget EmployeeEntity entity);
 
     /**
      * Convert DepartmentEntity to String (department name)

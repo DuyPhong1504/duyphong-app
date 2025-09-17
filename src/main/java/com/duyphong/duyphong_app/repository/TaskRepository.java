@@ -3,8 +3,11 @@ package com.duyphong.duyphong_app.repository;
 import com.duyphong.duyphong_app.entity.TaskEntity;
 import com.duyphong.duyphong_app.enumeration.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -21,4 +24,23 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Integer> {
      * @return List of tasks matching the criteria
      */
     List<TaskEntity> findByEmployeeIdAndStatus(String employeeId, TaskStatus status);
+
+    /**
+     * Find tasks with optional filtering criteria and fetch employee details
+     * Supports filtering by employee_id, status, and due_date
+     * @param employeeId the employee ID (optional)
+     * @param status the task status (optional)
+     * @param dueDate the due date (optional)
+     * @return List of tasks matching the criteria with employee information
+     */
+    @Query("SELECT t FROM TaskEntity t " +
+           "LEFT JOIN FETCH t.employee e " +
+           "LEFT JOIN FETCH e.department d " +
+           "WHERE 1 = 1 " +
+           "AND (:employeeId IS NULL OR t.employeeId = :employeeId) " +
+           "AND (:status IS NULL OR t.status = :status) " +
+           "AND (:dueDate IS NULL OR t.dueDate = :dueDate)")
+    List<TaskEntity> findTasksWithFilters(@Param("employeeId") String employeeId,
+                                         @Param("status") TaskStatus status,
+                                         @Param("dueDate") LocalDate dueDate);
 }

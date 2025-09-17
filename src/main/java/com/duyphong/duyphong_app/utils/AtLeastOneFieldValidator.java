@@ -1,14 +1,14 @@
 package com.duyphong.duyphong_app.utils;
 
-import com.duyphong.duyphong_app.dto.EmployeeUpdateDto;
+import com.duyphong.duyphong_app.dto.request.UpdateEmployeeRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validator implementation for @AtLeastOneField annotation
- * Ensures that at least one field in EmployeeUpdateDto is not null
+ * Ensures that at least one field in UpdateEmployeeRequest is not null
  */
-public class AtLeastOneFieldValidator implements ConstraintValidator<AtLeastOneField, EmployeeUpdateDto> {
+public class AtLeastOneFieldValidator implements ConstraintValidator<AtLeastOneField, UpdateEmployeeRequest> {
 
     @Override
     public void initialize(AtLeastOneField constraintAnnotation) {
@@ -16,7 +16,7 @@ public class AtLeastOneFieldValidator implements ConstraintValidator<AtLeastOneF
     }
 
     @Override
-    public boolean isValid(EmployeeUpdateDto value, ConstraintValidatorContext context) {
+    public boolean isValid(UpdateEmployeeRequest value, ConstraintValidatorContext context) {
         if (value == null) {
             return false;
         }

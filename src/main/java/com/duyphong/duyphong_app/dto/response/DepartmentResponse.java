@@ -1,10 +1,10 @@
-package com.duyphong.duyphong_app.dto;
+package com.duyphong.duyphong_app.dto.response;
 
 import lombok.*;
 
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-public class DepartmentDto {
+public class DepartmentResponse {
     private String id;
     private String name;
 }

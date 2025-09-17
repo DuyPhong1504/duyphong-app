@@ -1,16 +1,13 @@
-package com.duyphong.duyphong_app.dto;
+package com.duyphong.duyphong_app.dto.response;
 
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * DTO for detailed employee information including department and ongoing tasks
- */
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-public class EmployeeDetailDto {
+public class EmployeeDetailResponse {
     private String id;
     private String fullname;
     private String email;
@@ -19,9 +16,6 @@ public class EmployeeDetailDto {
     private DepartmentInfo department;
     private List<TaskInfo> ongoingTasks;
 
-    /**
-     * Nested DTO for department information
-     */
     @Getter @Setter
     @NoArgsConstructor @AllArgsConstructor @Builder
     public static class DepartmentInfo {
@@ -29,9 +23,6 @@ public class EmployeeDetailDto {
         private String name;
     }
 
-    /**
-     * Nested DTO for task information
-     */
     @Getter @Setter
     @NoArgsConstructor @AllArgsConstructor @Builder
     public static class TaskInfo {
