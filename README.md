@@ -79,6 +79,8 @@ spring.datasource.password=your_password
 
 ### 4. Build and Run the Application
 
+#### For Production (using MySQL):
+
 #### Navigate back to the project root folder:
 
 If you are currently in the `container` directory, navigate back to the project root:
@@ -108,12 +110,44 @@ Alternatively, you can build a JAR file and run it:
 java -jar target/duyphong-app-0.0.1-SNAPSHOT.jar
 ```
 
+#### For Development (using H2 in-memory database):
+
+For quick development and testing, you can use the H2 in-memory database instead of MySQL:
+
+#### Build and run with development profile:
+
+```bash
+./mvnw spring-boot:run -Pdev
+```
+
+Or using Spring profiles:
+
+```bash
+./mvnw spring-boot:run -Dspring.profiles.active=dev
+```
+
+This will:
+
+- Use H2 in-memory database instead of MySQL
+- Automatically create tables and load sample data
+- Enable H2 console at `http://localhost:8080/h2-console`
+- Set enhanced logging for development
+
+#### H2 Console Access:
+
+When running in development mode, you can access the H2 database console at:
+
+- **URL**: `http://localhost:8080/h2-console`
+- **JDBC URL**: `jdbc:h2:mem:company`
+- **Username**: `sa`
+- **Password**: (leave empty)
+
 ### 5. Access the Application
 
 Once the application starts successfully:
 
 - **Application URL**: `http://localhost:8080`
-- **Swagger UI (API Documentation)**: `http://localhost:8080/swagger-ui.html`
+- **Swagger UI (API Documentation)**: `http://localhost:8080/swagger-ui/index.html`
 
 ## Available Endpoints
 
@@ -125,16 +159,105 @@ The application provides REST APIs for:
 
 You can explore all available endpoints using the Swagger UI interface.
 
+## API Testing
+
+For comprehensive API testing documentation with sample requests and responses, see [API_TEST_CASES.md](API_TEST_CASES.md).
+
+This document includes:
+
+- Detailed test cases for all endpoints
+- Sample request/response data
+- Error handling examples
+- Database setup instructions
+- Testing tips and best practices
+
 ## Database Information
 
-The application uses MySQL with the following tables:
+The application supports two database configurations:
 
-- `departments` - Company departments
-- `employees` - Employee information
-- `tasks` - Task management
-- `department_history` - Department change tracking
+### Production Environment (MySQL)
 
-Sample data is automatically loaded when the Docker container starts.
+- Uses MySQL 8.0 with Docker
+- Requires Docker Compose setup (see Installation section)
+- Full dataset with 100 departments, 100 employees, and complete sample data
+- Persistent data storage
+
+### Development Environment (H2)
+
+- Uses H2 in-memory database
+- No Docker required - quick startup
+- Sample dataset with 20 departments, 20 employees, and basic sample data
+- Data resets on application restart
+- Includes H2 web console for database inspection
+
+### Switching Between Environments
+
+#### Run with MySQL (Production):
+
+```bash
+./mvnw spring-boot:run
+```
+
+#### Run with H2 (Development):
+
+```bash
+./mvnw spring-boot:run -Pdev
+```
+
+### Database Configuration Files
+
+The application uses different configuration files for each environment:
+
+- **`application.properties`** - Default MySQL configuration
+- **`application-dev.properties`** - H2 development configuration
+- **`schema.sql`** - H2 database schema (automatically executed in dev mode)
+- **`data.sql`** - H2 sample data (automatically loaded in dev mode)
+
+The application uses MySQL with the following tables and structure:
+
+### Main Tables
+
+- **`departments`** - Company departments
+
+  - Contains 100+ departments with IDs like `dept-001`, `dept-002`, etc.
+  - Includes various departments: Sales, Marketing, Engineering, Finance, HR, IT, Legal, etc.
+
+- **`employees`** - Employee information
+
+  - Contains 100 employees with IDs from `emp-001` to `emp-100`
+  - Fields: id, username, email, fullname, department, position, salary, created_at, updated_at
+  - Sample employees include developers, managers, analysts, specialists across all departments
+
+- **`tasks`** - Task management
+
+  - Task assignments and tracking system
+  - Links tasks to employees with status tracking
+
+- **`lunch_logs`** - Meal tracking system
+
+  - Records employee meal information
+  - Fields: id, employee_id, lunch_date, meal_type, restaurant, notes
+  - Tracks lunch and dinner meals for employees
+
+- **`department_history`** - Department change tracking
+
+  - Tracks employee department transfers over time
+  - Contains 101 records showing historical department changes
+  - Fields: id, employee_id, old_department_id, new_department_id, change_date
+
+- **`employee_department`** - Employee-Department relationship table
+  - Junction table for employee-department associations
+
+### Sample Data Overview
+
+The database comes pre-loaded with:
+
+- **100 departments** (dept-001 to dept-100) covering all major business functions
+- **100 employees** (emp-001 to emp-100) with realistic profiles and salaries
+- **100+ department history records** showing employee movements between departments
+- **Lunch log entries** for meal tracking functionality
+
+Sample data is automatically loaded when the Docker container starts using the `dump-company-202509162226.sql` file.
 
 ## Development
 
