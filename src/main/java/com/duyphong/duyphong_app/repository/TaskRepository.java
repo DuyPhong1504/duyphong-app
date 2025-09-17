@@ -43,4 +43,13 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Integer> {
     List<TaskEntity> findTasksWithFilters(@Param("employeeId") String employeeId,
                                          @Param("status") TaskStatus status,
                                          @Param("dueDate") LocalDate dueDate);
+    
+    /**
+     * Count tasks by department ID and status
+     * @param departmentId the department ID
+     * @param status the task status
+     * @return the number of tasks matching the criteria
+     */
+    @Query("SELECT COUNT(t) FROM TaskEntity t JOIN t.employee e WHERE e.department.id = :departmentId AND t.status = :status")
+    Long countTasksByDepartmentIdAndStatus(@Param("departmentId") String departmentId, @Param("status") TaskStatus status);
 }

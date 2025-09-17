@@ -3,6 +3,7 @@ package com.duyphong.duyphong_app.controller;
 import com.duyphong.duyphong_app.dto.request.CreateDepartmentRequest;
 import com.duyphong.duyphong_app.dto.response.DepartmentAverageSalaryResponse;
 import com.duyphong.duyphong_app.dto.response.DepartmentResponse;
+import com.duyphong.duyphong_app.dto.response.DepartmentStatisticsResponse;
 import com.duyphong.duyphong_app.service.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -72,5 +73,24 @@ public class DepartmentController {
         
         log.info("Successfully retrieved average salaries for {} departments", departmentAverageSalaries.size());
         return ResponseEntity.ok(departmentAverageSalaries);
+    }
+    
+    /**
+     * Get comprehensive department statistics
+     * @param id the department ID
+     * @return ResponseEntity containing DepartmentStatisticsResponse with aggregated department information
+     */
+    @GetMapping("/statistics/{id}")
+    public ResponseEntity<DepartmentStatisticsResponse> getDepartmentStatistics(@PathVariable String id) {
+        log.info("Received request to get statistics for department: {}", id);
+        
+        try {
+            DepartmentStatisticsResponse statistics = departmentService.getDepartmentStatistics(id);
+            log.info("Successfully retrieved statistics for department: {}", id);
+            return ResponseEntity.ok(statistics);
+        } catch (IllegalArgumentException e) {
+            log.error("Failed to get department statistics: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
     }
 }
