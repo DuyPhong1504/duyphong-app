@@ -93,17 +93,61 @@ If you are already in the project root folder, you can skip this step.
 
 #### Build the project:
 
+**On Windows PowerShell:**
+
+```powershell
+.\mvnw clean compile
+```
+
+**On Windows Command Prompt (cmd):**
+
+```cmd
+mvnw.cmd clean compile
+```
+
+**On macOS/Linux:**
+
 ```bash
 ./mvnw clean compile
 ```
 
 #### Run the application:
 
+**On Windows PowerShell:**
+
+```powershell
+.\mvnw spring-boot:run
+```
+
+**On Windows Command Prompt (cmd):**
+
+```cmd
+mvnw.cmd spring-boot:run
+```
+
+**On macOS/Linux:**
+
 ```bash
 ./mvnw spring-boot:run
 ```
 
 Alternatively, you can build a JAR file and run it:
+
+**On Windows PowerShell:**
+
+```powershell
+.\mvnw clean package
+java -jar target/duyphong-app-0.0.1-SNAPSHOT.jar
+```
+
+**On Windows Command Prompt (cmd):**
+
+```cmd
+mvnw.cmd clean package
+java -jar target/duyphong-app-0.0.1-SNAPSHOT.jar
+```
+
+**On macOS/Linux:**
 
 ```bash
 ./mvnw clean package
@@ -116,11 +160,39 @@ For quick development and testing, you can use the H2 in-memory database instead
 
 #### Build and run with development profile:
 
+**On Windows PowerShell:**
+
+```powershell
+.\mvnw spring-boot:run -Pdev
+```
+
+**On Windows Command Prompt (cmd):**
+
+```cmd
+mvnw.cmd spring-boot:run -Pdev
+```
+
+**On macOS/Linux:**
+
 ```bash
 ./mvnw spring-boot:run -Pdev
 ```
 
 Or using Spring profiles:
+
+**On Windows PowerShell:**
+
+```powershell
+.\mvnw spring-boot:run -Dspring.profiles.active=dev
+```
+
+**On Windows Command Prompt (cmd):**
+
+```cmd
+mvnw.cmd spring-boot:run -Dspring.profiles.active=dev
+```
+
+**On macOS/Linux:**
 
 ```bash
 ./mvnw spring-boot:run -Dspring.profiles.active=dev
@@ -189,20 +261,6 @@ The application supports two database configurations:
 - Sample dataset with 20 departments, 20 employees, and basic sample data
 - Data resets on application restart
 - Includes H2 web console for database inspection
-
-### Switching Between Environments
-
-#### Run with MySQL (Production):
-
-```bash
-./mvnw spring-boot:run
-```
-
-#### Run with H2 (Development):
-
-```bash
-./mvnw spring-boot:run -Pdev
-```
 
 ### Database Configuration Files
 
@@ -298,6 +356,28 @@ docker-compose down -v
 - If port 8080 is in use, change `server.port` in `application.properties`
 
 ### Maven Build Issues
+
+**On Windows PowerShell:**
+
+```powershell
+# Clean and rebuild
+.\mvnw clean install
+
+# Skip tests if needed
+.\mvnw clean install -DskipTests
+```
+
+**On Windows Command Prompt (cmd):**
+
+```cmd
+# Clean and rebuild
+mvnw.cmd clean install
+
+# Skip tests if needed
+mvnw.cmd clean install -DskipTests
+```
+
+**On macOS/Linux:**
 
 ```bash
 # Clean and rebuild
