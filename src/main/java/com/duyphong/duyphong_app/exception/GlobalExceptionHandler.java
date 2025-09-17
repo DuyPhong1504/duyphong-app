@@ -101,7 +101,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle JSON parsing errors (including date format errors)
+     * Handle JSON parsing errors (including date format and enum errors)
      * @param ex the HttpMessageNotReadableException
      * @return ResponseEntity with error details
      */
@@ -111,10 +111,28 @@ public class GlobalExceptionHandler {
         
         String message = "Invalid JSON format";
         
-        // Check if it's a date format error
+        // Check if the error message contains MealType validation error
+        if (ex.getMessage() != null && ex.getMessage().contains("MealType")) {
+            Map<String, String> fieldErrors = new HashMap<>();
+            fieldErrors.put("mealType", "Meal type must be either LUNCH or DINNER");
+            
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .timestamp(LocalDateTime.now())
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .error("Invalid Value")
+                    .message("Invalid meal type value")
+                    .fieldErrors(fieldErrors)
+                    .build();
+            
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
+        // Check if it's a format error (date or enum)
         Throwable cause = ex.getCause();
         if (cause instanceof InvalidFormatException) {
             InvalidFormatException invalidFormatEx = (InvalidFormatException) cause;
+            
+            // Handle date format errors
             if (invalidFormatEx.getTargetType() != null && 
                 invalidFormatEx.getTargetType().getSimpleName().equals("LocalDate")) {
                 
@@ -124,13 +142,42 @@ public class GlobalExceptionHandler {
                 }
                 
                 Map<String, String> fieldErrors = new HashMap<>();
-                fieldErrors.put(fieldName, "Due date format is invalid. Please use format: yyyy-MM-dd (e.g., 2025-12-31)");
+                String dateErrorMessage = fieldName.equals("lunchDate") ? 
+                    "Lunch date format is invalid. Please use format: yyyy-MM-dd (e.g., 2025-09-17)" :
+                    "Due date format is invalid. Please use format: yyyy-MM-dd (e.g., 2025-12-31)";
+                fieldErrors.put(fieldName, dateErrorMessage);
                 
                 ErrorResponse errorResponse = ErrorResponse.builder()
                         .timestamp(LocalDateTime.now())
                         .status(HttpStatus.BAD_REQUEST.value())
                         .error("Date Format Error")
                         .message("Invalid date format")
+                        .fieldErrors(fieldErrors)
+                        .build();
+                
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            // Handle enum format errors (like MealType)
+            if (invalidFormatEx.getTargetType() != null && 
+                invalidFormatEx.getTargetType().isEnum()) {
+                
+                String fieldName = "field";
+                if (invalidFormatEx.getPath() != null && !invalidFormatEx.getPath().isEmpty()) {
+                    fieldName = invalidFormatEx.getPath().get(invalidFormatEx.getPath().size() - 1).getFieldName();
+                }
+                
+                Map<String, String> fieldErrors = new HashMap<>();
+                String enumErrorMessage = fieldName.equals("mealType") ? 
+                    "Meal type must be either LUNCH or DINNER" :
+                    String.format("Invalid value for %s. Please check allowed values.", fieldName);
+                fieldErrors.put(fieldName, enumErrorMessage);
+                
+                ErrorResponse errorResponse = ErrorResponse.builder()
+                        .timestamp(LocalDateTime.now())
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .error("Invalid Value")
+                        .message("Invalid enum value")
                         .fieldErrors(fieldErrors)
                         .build();
                 
