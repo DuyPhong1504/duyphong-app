@@ -1,5 +1,6 @@
 package com.duyphong.duyphong_app.service;
 
+import com.duyphong.duyphong_app.dto.response.DepartmentAverageSalaryResponse;
 import com.duyphong.duyphong_app.dto.response.DepartmentResponse;
 import com.duyphong.duyphong_app.entity.DepartmentEntity;
 import com.duyphong.duyphong_app.mapper.DepartmentMapper;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Service layer for Department operations
@@ -68,5 +70,23 @@ public class DepartmentService {
         log.info("Successfully created department with ID: {} and name: {}", savedEntity.getId(), savedEntity.getName());
         
         return departmentMapper.toDto(savedEntity);
+    }
+    
+    /**
+     * Get department average salaries
+     * @return List of DepartmentAverageSalaryResponse containing department names and their average employee salaries
+     */
+    public List<DepartmentAverageSalaryResponse> getDepartmentAverageSalaries() {
+        log.info("Retrieving department average salaries");
+        
+        List<Object[]> results = departmentRepository.findDepartmentAverageSalaries();
+        log.info("Found {} departments with salary data", results.size());
+        
+        return results.stream()
+                .map(result -> DepartmentAverageSalaryResponse.builder()
+                        .departmentName((String) result[0])
+                        .averageSalary(result[1] != null ? ((Number) result[1]).doubleValue() : 0.0)
+                        .build())
+                .collect(Collectors.toList());
     }
 }

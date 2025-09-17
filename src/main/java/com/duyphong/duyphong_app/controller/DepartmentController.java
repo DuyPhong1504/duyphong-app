@@ -1,6 +1,7 @@
 package com.duyphong.duyphong_app.controller;
 
 import com.duyphong.duyphong_app.dto.request.CreateDepartmentRequest;
+import com.duyphong.duyphong_app.dto.response.DepartmentAverageSalaryResponse;
 import com.duyphong.duyphong_app.dto.response.DepartmentResponse;
 import com.duyphong.duyphong_app.service.DepartmentService;
 import jakarta.validation.Valid;
@@ -57,5 +58,19 @@ public class DepartmentController {
             log.error("Failed to create department: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         }
+    }
+    
+    /**
+     * Get department average salaries
+     * @return ResponseEntity containing list of DepartmentAverageSalaryResponse
+     */
+    @GetMapping("/average-salaries")
+    public ResponseEntity<List<DepartmentAverageSalaryResponse>> getDepartmentAverageSalaries() {
+        log.info("Received request to get department average salaries");
+        
+        List<DepartmentAverageSalaryResponse> departmentAverageSalaries = departmentService.getDepartmentAverageSalaries();
+        
+        log.info("Successfully retrieved average salaries for {} departments", departmentAverageSalaries.size());
+        return ResponseEntity.ok(departmentAverageSalaries);
     }
 }
