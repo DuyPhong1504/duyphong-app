@@ -1,6 +1,16 @@
 # DuyPhong App
 
+[![CI - Build Check](https://github.com/DuyPhong1504/duyphong-app/actions/workflows/ci.yml/badge.svg)](https://github.com/DuyPhong1504/duyphong-app/actions/workflows/ci.yml)
+
 A Spring Boot application for company management with employee, department, and task tracking features.
+
+## Features
+
+- **Automated CI/CD**: GitHub Actions workflow for continuous integration
+- **Multi-database Support**: Production MySQL and development H2 configurations
+- **Comprehensive API Documentation**: Swagger/OpenAPI integration
+- **Docker Support**: Easy database setup with Docker Compose
+- **Modern Architecture**: Clean layered architecture with proper separation of concerns
 
 ## Prerequisites
 
@@ -322,6 +332,42 @@ Sample data is automatically loaded when the Docker container starts using the `
 ### Hot Reload
 
 The application is configured with Spring Boot DevTools for development convenience. Changes to Java files will trigger an automatic restart.
+
+## GitHub Actions CI/CD
+
+This project includes automated continuous integration using GitHub Actions. The CI workflow is configured to:
+
+### What the CI does:
+
+- **Automatic Builds**: Triggers on push to `main` and `develop` branches
+- **Pull Request Validation**: Runs checks on all pull requests
+- **Java 17 Setup**: Automatically configures the correct Java version
+- **Maven Build**: Compiles the project and packages the application
+- **Dependency Caching**: Caches Maven dependencies for faster builds
+
+### CI Workflow Details:
+
+- **File Location**: `.github/workflows/ci.yml`
+- **Runs on**: Ubuntu Latest
+- **Build Tool**: Maven wrapper (`./mvnw`)
+- **Java Distribution**: Eclipse Temurin 17
+- **Build Steps**:
+  1. Checkout source code
+  2. Setup JDK 17 with Maven caching
+  3. Validate Maven wrapper permissions
+  4. Build project (`mvnw clean compile`)
+  5. Package application (`mvnw package`)
+  6. Cache Maven dependencies
+
+### Viewing CI Status:
+
+- Check the status badge at the top of this README
+- View detailed logs at: [GitHub Actions](https://github.com/DuyPhong1504/duyphong-app/actions)
+- CI runs automatically on every push and pull request
+
+### Local Development vs CI:
+
+The CI uses the same Maven commands as local development, ensuring consistency between local builds and automated builds.
 
 ## Stopping the Application
 
